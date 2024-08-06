@@ -1,12 +1,13 @@
-# Usar una imagen base con VNC y X11
 FROM selenium/node-chrome:latest
 
-# Instalar stunnel y x11vnc
+# Instalar stunnel
+USER root
 RUN apt-get update && \
-    apt-get install -y stunnel x11vnc
+    apt-get install -y stunnel
 
-# Configurar el punto de entrada
-ENTRYPOINT ["/bin/bash", "-c", "stunnel /etc/stunnel/stunnel.conf & x11vnc -forever -shared -rfbport 5900 -display :99"]
+# Agregar certificados y archivo de configuración
+COPY stunnel.conf /etc/stunnel/stunnel.conf
+COPY certs/ /etc/stunnel/certs/
 
-# Exponer puertos VNC y SSL
-EXPOSE 5900 5901
+# Configurar entrypoint para incluir stunnel
+ENTRYPOINT ["/bin/bash", "-c", "stunnel /etc/stunnel/stunnel.conf & /opt/bin/entry_point.sh"]
